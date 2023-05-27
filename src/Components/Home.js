@@ -1,19 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useHistory } from "react-router-dom";
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import BookCard from "./BookCard";
 
 export default function Home({ onBookSelect }) {
-  // Rest of your code...
-
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const containerRef = useRef(null);
-  const history = useHistory();
 
   useEffect(() => {
     const savedSearchResults = JSON.parse(
@@ -95,8 +91,6 @@ export default function Home({ onBookSelect }) {
 
   const handleBookSelect = (book) => {
     onBookSelect(book);
-    // Remove the line below if you don't want to redirect to the "/read-list" page
-    history.push("/read-list");
   };
 
   return (
