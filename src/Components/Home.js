@@ -5,7 +5,7 @@ import Col from "react-bootstrap/Col";
 import BookCard from "./BookCard";
 
 export default function Home({ onBookSelect }) {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState("Dakini");
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
@@ -50,14 +50,41 @@ export default function Home({ onBookSelect }) {
     };
   }, [loading]);
 
+  const addBookToMockAPI = async (bookData) => {
+    try {
+      const url = "https://645f13aa9d35038e2d1caaa0.mockapi.io/BOOKS/user";
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(bookData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to add book to MockAPI");
+      }
+
+      const data = await response.json();
+      console.log("Book added to MockAPI:", data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const fetchBooks = async () => {
     try {
       setLoading(true);
-      const response = await fetch(
-        `https://www.googleapis.com/books/v1/volumes?q=${searchQuery}&startIndex=${
-          (page - 1) * 12
-        }&maxResults=12`
-      );
+      const encodedSearchQuery = encodeURIComponent(searchQuery);
+      const apiKey = "AIzaSyD4bDZu4aTKIdYFtJM-OV81C6IeSrrTZgg";
+      const url = `https://www.googleapis.com/books/v1/volumes?q=${encodedSearchQuery}&startIndex=${
+        (page - 1) * 12
+      }&maxResults=12&key=${apiKey}`;
+
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error("Fetch failed");
+      }
       const data = await response.json();
       const bookItems = data.items;
       if (bookItems) {
@@ -70,6 +97,11 @@ export default function Home({ onBookSelect }) {
             imageUrl: volumeInfo.imageLinks?.thumbnail,
           };
         });
+
+        for (const book of formattedBooks) {
+          await addBookToMockAPI(book);
+        }
+
         setSearchResults((prevBooks) => [...prevBooks, ...formattedBooks]);
         localStorage.setItem(
           "searchResults",
@@ -79,6 +111,7 @@ export default function Home({ onBookSelect }) {
       setLoading(false);
     } catch (error) {
       console.error(error);
+      setLoading(false);
     }
   };
 

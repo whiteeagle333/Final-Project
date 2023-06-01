@@ -77,7 +77,7 @@ export default function ReadList({ selectedBooks, onBookDelete }) {
           console.error("Error fetching book details:", error);
         });
     }
-  }, [selectedBook]);
+  }, []);
 
   return (
     <div>

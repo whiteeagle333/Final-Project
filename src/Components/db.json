@@ -1,0 +1,14 @@
+{
+  "books": [
+    {
+      "id": 1,
+      "title": "Book 1",
+      "review": "Review 1"
+    },
+    {
+      "id": 2,
+      "title": "Book 2",
+      "review": "Review 2"
+    }
+  ]
+}
