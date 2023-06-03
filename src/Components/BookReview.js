@@ -1,7 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react"; // Import the Footer components
+
 import Table from "react-bootstrap/Table";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
+import Footer from "./Footer"; // Import the Footer components
+
+const API_ENDPOINT =
+  "https://6478e874362560649a2ea098.mockapi.io/book/bookreviews";
 
 export default function BookReview() {
   const [reviews, setReviews] = useState([]);
@@ -16,9 +21,7 @@ export default function BookReview() {
 
   const fetchReviews = async () => {
     try {
-      const response = await fetch(
-        "https://6478e874362560649a2ea098.mockapi.io/books/books"
-      );
+      const response = await fetch(API_ENDPOINT);
       const data = await response.json();
       setReviews(data);
     } catch (error) {
@@ -41,16 +44,13 @@ export default function BookReview() {
 
     if (selectedReviewId) {
       try {
-        await fetch(
-          `https://6478e874362560649a2ea098.mockapi.io/books/books/${selectedReviewId}`,
-          {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(newReview),
-          }
-        );
+        await fetch(`${API_ENDPOINT}/${selectedReviewId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(newReview),
+        });
 
         setReviews((prevReviews) =>
           prevReviews.map((review) => {
@@ -71,16 +71,13 @@ export default function BookReview() {
       }
     } else {
       try {
-        const response = await fetch(
-          "https://6478e874362560649a2ea098.mockapi.io/books/books",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(newReview),
-          }
-        );
+        const response = await fetch(API_ENDPOINT, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(newReview),
+        });
 
         const data = await response.json();
         setReviews((prevReviews) => [...prevReviews, data]);
@@ -94,14 +91,13 @@ export default function BookReview() {
     }
   };
 
-  const removeReview = async (reviewId) => {
+  const deleteReview = async (reviewId) => {
+    console.log(reviewId); // Add this line to log the reviewId
+
     try {
-      await fetch(
-        `https://6478e874362560649a2ea098.mockapi.io/books/books/${reviewId}`,
-        {
-          method: "DELETE",
-        }
-      );
+      await fetch(`${API_ENDPOINT}/${reviewId}`, {
+        method: "DELETE",
+      });
 
       setReviews((prevReviews) =>
         prevReviews.filter((review) => review.id !== reviewId)
@@ -142,14 +138,14 @@ export default function BookReview() {
           </tr>
         </thead>
         <tbody>
-          {reviews.map((review) => (
-            <tr key={review.id}>
+          {reviews.map((review, index) => (
+            <tr key={index}>
               <td>{review.title}</td>
               <td>{review.review}</td>
               <td>
                 <Button
                   variant="danger"
-                  onClick={() => removeReview(review.id)}
+                  onClick={() => deleteReview(review.id)} // Pass the review.id value to deleteReview
                 >
                   Delete
                 </Button>
@@ -197,6 +193,7 @@ export default function BookReview() {
           </Button>
         )}
       </Form>
+      <Footer /> {<footer></footer>}
     </div>
   );
 }

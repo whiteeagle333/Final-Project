@@ -6,8 +6,9 @@ import Modal from "react-bootstrap/Modal";
 import Tab from "react-bootstrap/Tab";
 import Nav from "react-bootstrap/Nav";
 import Form from "react-bootstrap/Form";
+import Footer from "./Footer"; // Import the Footer component
 
-export default function ReadList({ selectedBooks, onBookDelete }) {
+export default function ReadList({ selectedBooks, onBookDelete, limit }) {
   const history = useHistory();
   const [selectedBook, setSelectedBook] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -15,6 +16,23 @@ export default function ReadList({ selectedBooks, onBookDelete }) {
 
   const handleBookDelete = (isbn) => {
     if (typeof onBookDelete === "function") {
+      const bookToDelete = selectedBooks.find((book) => book.isbn === isbn);
+      if (bookToDelete) {
+        fetch("https://647a10b3a455e257fa6442e4.mockapi.io/read/ReadList", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(bookToDelete),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log("Book transferred to Read List:", data);
+          })
+          .catch((error) => {
+            console.error("Error transferring book to Read List:", error);
+          });
+      }
       onBookDelete(isbn);
     }
   };
@@ -36,10 +54,8 @@ export default function ReadList({ selectedBooks, onBookDelete }) {
   const handleSaveDetails = () => {
     if (selectedBook) {
       const updatedBook = { ...selectedBook, details: bookDetails };
-      // Update the book in your data or send the updated book object to a server
-      // Make a PUT request to the API to update the book details
       fetch(
-        `https://645f13aa9d35038e2d1caaa0.mockapi.io/books/user/${selectedBook.isbn}`,
+        `https://647a10b3a455e257fa6442e4.mockapi.io/read/ReadList/${selectedBook.isbn}`,
         {
           method: "PUT",
           headers: {
@@ -50,11 +66,9 @@ export default function ReadList({ selectedBooks, onBookDelete }) {
       )
         .then((response) => response.json())
         .then((data) => {
-          // Handle success
           console.log("Book details updated:", data);
         })
         .catch((error) => {
-          // Handle error
           console.error("Error updating book details:", error);
         });
     }
@@ -63,9 +77,8 @@ export default function ReadList({ selectedBooks, onBookDelete }) {
 
   useEffect(() => {
     if (selectedBook) {
-      // Fetch book details from the API
       fetch(
-        `https://645f13aa9d35038e2d1caaa0.mockapi.io/books/user/${selectedBook.isbn}`
+        `https://647a10b3a455e257fa6442e4.mockapi.io/read/ReadList/${selectedBook.isbn}`
       )
         .then((response) => response.json())
         .then((data) => {
@@ -77,14 +90,16 @@ export default function ReadList({ selectedBooks, onBookDelete }) {
           console.error("Error fetching book details:", error);
         });
     }
-  }, []);
+  }, [selectedBook]);
+
+  const limitedBooks = limit ? selectedBooks.slice(0, limit) : selectedBooks;
 
   return (
     <div>
       <h2>To Read List</h2>
       <div style={{ overflowX: "scroll" }}>
         <div style={{ display: "flex" }}>
-          {selectedBooks.map((book) => (
+          {limitedBooks.map((book) => (
             <div key={book.isbn} style={{ margin: "10px" }}>
               <Card style={{ width: "10rem" }}>
                 <Card.Img
@@ -105,7 +120,6 @@ export default function ReadList({ selectedBooks, onBookDelete }) {
         </div>
       </div>
       <button onClick={handleGoHome}>Take me home</button>
-
       <Modal show={showModal} onHide={handleCloseModal}>
         <Modal.Header closeButton>
           <Modal.Title>Book Details</Modal.Title>
@@ -138,6 +152,7 @@ export default function ReadList({ selectedBooks, onBookDelete }) {
           </Button>
         </Modal.Footer>
       </Modal>
+      <Footer /> {<footer></footer>}
     </div>
   );
 }

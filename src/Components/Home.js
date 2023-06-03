@@ -3,6 +3,7 @@ import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import BookCard from "./BookCard";
+import Footer from "./Footer"; // Import the Footer component
 
 export default function Home({ onBookSelect }) {
   const [searchQuery, setSearchQuery] = useState("Dakini");
@@ -50,33 +51,11 @@ export default function Home({ onBookSelect }) {
     };
   }, [loading]);
 
-  const addBookToMockAPI = async (bookData) => {
-    try {
-      const url = "https://645f13aa9d35038e2d1caaa0.mockapi.io/BOOKS/user";
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(bookData),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to add book to MockAPI");
-      }
-
-      const data = await response.json();
-      console.log("Book added to MockAPI:", data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
   const fetchBooks = async () => {
     try {
       setLoading(true);
       const encodedSearchQuery = encodeURIComponent(searchQuery);
-      const apiKey = "AIzaSyD4bDZu4aTKIdYFtJM-OV81C6IeSrrTZgg";
+      const apiKey = "AIzaSyD4bDZu4aTKIdYFtJM-OV81C6IeSrrTZgg"; // Replace with your Google Books API key
       const url = `https://www.googleapis.com/books/v1/volumes?q=${encodedSearchQuery}&startIndex=${
         (page - 1) * 12
       }&maxResults=12&key=${apiKey}`;
@@ -98,14 +77,14 @@ export default function Home({ onBookSelect }) {
           };
         });
 
-        for (const book of formattedBooks) {
-          await addBookToMockAPI(book);
-        }
+        const uniqueBooks = formattedBooks.filter((book) => {
+          return !searchResults.some((prevBook) => prevBook.isbn === book.isbn);
+        });
 
-        setSearchResults((prevBooks) => [...prevBooks, ...formattedBooks]);
+        setSearchResults((prevBooks) => [...prevBooks, ...uniqueBooks]);
         localStorage.setItem(
           "searchResults",
-          JSON.stringify([...searchResults, ...formattedBooks])
+          JSON.stringify([...searchResults, ...uniqueBooks])
         );
       }
       setLoading(false);
@@ -124,6 +103,19 @@ export default function Home({ onBookSelect }) {
 
   const handleBookSelect = (book) => {
     onBookSelect(book);
+
+    // Add book to the "ReadList" API
+    const url = "https://647a10b3a455e257fa6442e4.mockapi.io/read/ReadList";
+    fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(book),
+    })
+      .then((response) => response.json())
+      .then((data) => console.log("Book added to ReadList:", data))
+      .catch((error) => console.error("Error adding book to ReadList:", error));
   };
 
   return (
@@ -149,6 +141,7 @@ export default function Home({ onBookSelect }) {
         {loading && <p>Loading...</p>}
         <div ref={containerRef}></div>
       </div>
+      <Footer /> {<footer></footer>}
     </Container>
   );
 }
