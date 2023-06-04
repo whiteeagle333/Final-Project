@@ -1,5 +1,6 @@
 import React from "react";
-
+//This line defines a React functional component named ParagraphSection.
+//Functional components are reusable pieces of code that can render UI elements and have their own state and props.
 export default function ParagraphSection() {
   return (
     <p className="lead">
